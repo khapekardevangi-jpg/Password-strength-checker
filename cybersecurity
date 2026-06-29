@@ -1,0 +1,121 @@
+# =============================================================
+# Password Strength Checker — IBM SkillsBuild Internship Project
+# Author: khapekar devangi
+# Description: Analyzes password strength based on cybersecurity rules
+# =============================================================
+
+import re  # Regular expressions for pattern matching
+
+# ─────────────────────────────────────────────
+# Function: check_length
+# Checks if password meets minimum length (8 chars)
+# ─────────────────────────────────────────────
+def check_length(password):
+    return len(password) >= 8
+
+# ─────────────────────────────────────────────
+# Function: check_uppercase
+# Returns True if password has at least one uppercase letter
+# ─────────────────────────────────────────────
+def check_uppercase(password):
+    return bool(re.search(r'[A-Z]', password))
+
+# ─────────────────────────────────────────────
+# Function: check_lowercase
+# Returns True if password has at least one lowercase letter
+# ─────────────────────────────────────────────
+def check_lowercase(password):
+    return bool(re.search(r'[a-z]', password))
+
+# ─────────────────────────────────────────────
+# Function: check_numbers
+# Returns True if password contains at least one digit
+# ─────────────────────────────────────────────
+def check_numbers(password):
+    return bool(re.search(r'[0-9]', password))
+
+# ─────────────────────────────────────────────
+# Function: check_special_chars
+# Returns True if password has at least one special character
+# ─────────────────────────────────────────────
+def check_special_chars(password):
+    return bool(re.search(r'[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]', password))
+
+# ─────────────────────────────────────────────
+# Function: get_strength_score
+# Calculates total score (0–5) and returns failing criteria
+# ─────────────────────────────────────────────
+def get_strength_score(password):
+    criteria = [
+        ("At least 8 characters",    check_length(password)),
+        ("Uppercase letter (A-Z)",   check_uppercase(password)),
+        ("Lowercase letter (a-z)",   check_lowercase(password)),
+        ("Contains a number (0-9)",  check_numbers(password)),
+        ("Special character (!@#…)", check_special_chars(password)),
+    ]
+    score = sum(1 for _, passed in criteria if passed)
+    failed = [label for label, passed in criteria if not passed]
+    return score, failed
+
+# ─────────────────────────────────────────────
+# Function: classify_strength
+# Maps score to strength label
+# ─────────────────────────────────────────────
+def classify_strength(score):
+    if score <= 1:
+        return "Weak"
+    elif score <= 3:
+        return "Medium"
+    else:
+        return "Strong"
+
+# ─────────────────────────────────────────────
+# Function: get_suggestions
+# Returns improvement tips for missing criteria
+# ─────────────────────────────────────────────
+def get_suggestions(failed_criteria):
+    suggestions = {
+        "At least 8 characters":    "Make your password at least 8 characters long.",
+        "Uppercase letter (A-Z)":   "Add at least one uppercase letter.",
+        "Lowercase letter (a-z)":   "Add at least one lowercase letter.",
+        "Contains a number (0-9)":  "Include at least one number (0-9).",
+        "Special character (!@#…)": "Add a special character like !@#$%^&*",
+    }
+    return [suggestions[c] for c in failed_criteria if c in suggestions]
+
+# ─────────────────────────────────────────────
+# Function: check_password
+# Main function — runs full analysis and prints results
+# ─────────────────────────────────────────────
+def check_password(password):
+    print(f"\n🔐 Analyzing: '{password}'")
+    print("─" * 40)
+
+    score, failed = get_strength_score(password)
+    strength = classify_strength(score)
+    suggestions = get_suggestions(failed)
+
+    print(f"Score:    {score}/5")
+    print(f"Strength: {strength}")
+
+    if suggestions:
+        print("\n💡 Suggestions to improve:")
+        for tip in suggestions:
+            print(f"  • {tip}")
+    else:
+        print("  ✅ Your password meets all security criteria!")
+
+# ─────────────────────────────────────────────
+# Sample Test Cases
+# ─────────────────────────────────────────────
+if __name__ == "__main__":
+    test_passwords = [
+        "abc",           # Expected: Weak   (1/5)
+        "password",      # Expected: Weak   (2/5)
+        "Password1",     # Expected: Medium (3/5)
+        "Password1!",    # Expected: Strong (4/5)
+        "P@ssw0rd!2024", # Expected: Strong (5/5)
+    ]
+
+    for pwd in test_passwords:
+        check_password(pwd)
